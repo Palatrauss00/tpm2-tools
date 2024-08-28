@@ -374,3 +374,6 @@ AC_MSG_RESULT([
     - Unit tests: $enable_unit
     $unit_test_tool_report
 ])
+
+AC_CHECK_LIB([oqs], [OQS_KEM_new], [LIBS="$LIBS -loqs"], [AC_MSG_ERROR([liboqs not found!])])
+

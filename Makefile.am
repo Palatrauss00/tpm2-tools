@@ -666,3 +666,7 @@ if !HAVE_PANDOC
 	@(>&2 echo "You do not have pandoc, a requirement for the distribution of manpages")
 	@exit 1
 endif
+
+AM_CFLAGS = -I/usr/local/include
+AM_LDFLAGS = -L/usr/local/lib -loqs
+
