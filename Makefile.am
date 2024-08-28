@@ -667,6 +667,4 @@ if !HAVE_PANDOC
 	@exit 1
 endif
 
-AM_CFLAGS = -I/usr/local/include
-AM_LDFLAGS = -L/usr/local/lib -loqs
 
