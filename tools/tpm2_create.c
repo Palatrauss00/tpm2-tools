@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "files.h"
 #include "log.h"
@@ -391,6 +392,12 @@ static tool_rc process_inputs(ESYS_CONTEXT *ectx) {
     TPMA_OBJECT attrs = DEFAULT_CREATE_ATTRS;
     setup_attributes(&attrs);
 
+    if (strcmp(ctx.object.alg, "kyber768") == 0) {
+        printf("OK HA PRESO ALG");
+    //ctx.object.t.publicArea.type = TPM2_ALG_KYBER; // Mappatura per Kyber768
+    // Ulteriori configurazioni se necessarie...
+    }
+    
     /* Initialize object */
     rc = tpm2_alg_util_public_init(ctx.object.alg, ctx.object.name_alg,
         ctx.object.attrs, ctx.object.policy, attrs, &ctx.object.in_public);
