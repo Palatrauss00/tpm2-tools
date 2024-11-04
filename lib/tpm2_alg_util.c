@@ -571,6 +571,7 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
             goto error;
         }
         i++;
+        printf("%d", i);
     }
 
     if (i == 0) {
