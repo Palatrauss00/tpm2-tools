@@ -568,7 +568,6 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
             symdetail = tok;
             break;
         default:
-            printf("SONO ENTRATO QUI\n");
             goto error;
         }
         i++;
@@ -627,6 +626,7 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
     return true;
 
     error:
+    printf("SONO ENTRATO QUI\n");
     LOG_ERR("Could not handle algorithm spec: \"%s\"", alg_spec);
     return false;
 }
