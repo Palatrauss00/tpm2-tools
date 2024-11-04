@@ -24,14 +24,14 @@ void seal_key_in_tpm(const char *key_data, const char *key_file) {
 }
 
 // Funzione per decrittografare la chiave dal TPM
-void unseal_key_from_tpm(const char *key_file) {
+void unseal_key_from_tpm() {
     system("tpm2_unseal -c key.ctx > unsealed_key");
 }
 
 // Funzione principale
 int main() {
     // Inizializzazione di liboqs
-    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_default);
+    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_kem_kyber_90s); // Usa l'algoritmo Kyber 90s
     if (kem == NULL) {
         fprintf(stderr, "Error initializing OQS KEM\n");
         return EXIT_FAILURE;
@@ -64,7 +64,7 @@ int main() {
     printf("\n");
 
     // Unseal the secret key from the TPM
-    unseal_key_from_tpm("secret.key");
+    unseal_key_from_tpm();
 
     // Decrypt the shared secret
     // (Assuming secret_key has been read from unsealed_key)
