@@ -13,6 +13,7 @@
 #include "tpm2_convert.h"
 #include "tpm2_hierarchy.h"
 #include "tpm2_options.h"
+#include <oqs/oqs.h>
 
 #define MAX_SESSIONS 3
 typedef struct tpm_createprimary_ctx tpm_createprimary_ctx;
