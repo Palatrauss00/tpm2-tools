@@ -29,9 +29,9 @@ void unseal_key_from_tpm() {
 }
 
 // Funzione principale
-int main() {
+int main_tool() {
     // Inizializzazione di liboqs
-    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_kyber_768);
+    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_kyber_768); // Usa l'algoritmo Kyber 768
     if (kem == NULL) {
         fprintf(stderr, "Error initializing OQS KEM\n");
         return EXIT_FAILURE;
@@ -67,7 +67,6 @@ int main() {
     unseal_key_from_tpm();
 
     // Decrypt the shared secret
-    // (Assuming secret_key has been read from unsealed_key)
     uint8_t *unsealed_secret_key = malloc(kem->length_secret_key);
     FILE *key_fp = fopen("unsealed_key", "r");
     fread(unsealed_secret_key, sizeof(uint8_t), kem->length_secret_key, key_fp);
@@ -95,3 +94,9 @@ int main() {
 
     return EXIT_SUCCESS;
 }
+
+// Funzione main per il programma
+int main() {
+    return main_tool();
+}
+
