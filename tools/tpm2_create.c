@@ -13,6 +13,7 @@
 #include "tpm2_auth_util.h"
 #include "tpm2_options.h"
 #include "tpm2_util.h"
+#include <oqs/oqs.h>
 
 typedef struct tpm_create_ctx tpm_create_ctx;
 #define MAX_AUX_SESSIONS 2
@@ -88,7 +89,7 @@ struct tpm_create_ctx {
     tpm2_convert_pubkey_fmt format;
 };
 
-#define DEFAULT_KEY_ALG "rsa2048"
+#define DEFAULT_KEY_ALG "kyber768"
 
 static tpm_create_ctx ctx = {
         .object = {
