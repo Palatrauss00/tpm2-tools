@@ -568,6 +568,7 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
             symdetail = tok;
             break;
         default:
+            printf("SONO ENTRATO QUI\n");
             goto error;
         }
         i++;
@@ -620,7 +621,6 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
     /* handle asym detail */
     prc = handle_asym_detail(symdetail, public);
     if (prc != alg_parser_rc_done) {
-        printf("SONO ENTRATO QUI\n");
         goto error;
     }
 
