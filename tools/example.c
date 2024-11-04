@@ -1,100 +1,97 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <oqs/oqs.h>
-#include <tss2/tss_esys.h>
+#include <tss2/tss2_sys.h>
 
-#define TPM_KEY_FILE "kyber512_key.dat"
-#define TPM_KEY_CTX "primary.ctx"
+#define MESSAGE "Hello, Quantum Safe World!"
 
-int initialize_tpm_context(ESYS_CONTEXT **ctx) {
-    TSS2_RC r;
-    r = Esys_Initialize(ctx, NULL, NULL);
-    if (r != TSS2_RC_SUCCESS) {
-        fprintf(stderr, "Errore durante l'inizializzazione del contesto TPM.\n");
-        return 1;
+// Funzione per sigillare la chiave nel TPM
+void seal_key_in_tpm(const char *key_data, const char *key_file) {
+    FILE *fp = fopen(key_file, "w");
+    if (fp) {
+        fprintf(fp, "%s", key_data);
+        fclose(fp);
+    } else {
+        perror("Failed to open file for sealing");
+        exit(EXIT_FAILURE);
     }
-    return 0;
+
+    // Esegui i comandi TPM
+    system("tpm2_createprimary -C o -c primary.ctx");
+    system("tpm2_create -C primary.ctx -u key.pub -r key.priv -i key_file -c key.ctx");
+    system("tpm2_flushcontext --transient-object");
 }
 
-int generate_pq_key(unsigned char **public_key, unsigned char **secret_key) {
-    OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_kyber512);
-    if (sig == NULL) {
-        fprintf(stderr, "Errore durante la creazione dell'algoritmo Kyber512.\n");
-        return 1;
-    }
-
-    *public_key = malloc(sig->length_public_key);
-    *secret_key = malloc(sig->length_secret_key);
-
-    if (OQS_SIG_keypair(sig, *public_key, *secret_key) != OQS_SUCCESS) {
-        fprintf(stderr, "Errore durante la generazione della coppia di chiavi.\n");
-        OQS_SIG_free(sig);
-        return 1;
-    }
-
-    OQS_SIG_free(sig);
-    return 0;
+// Funzione per decrittografare la chiave dal TPM
+void unseal_key_from_tpm(const char *key_file) {
+    system("tpm2_unseal -c key.ctx > unsealed_key");
 }
 
-int import_key_to_tpm(ESYS_CONTEXT *ctx, const unsigned char *public_key) {
-    char command[512];
-    snprintf(command, sizeof(command),
-             "tpm2_import -C %s -G rsa -i %s -u kyber512_key.pub -r kyber512_key.priv",
-             TPM_KEY_CTX, TPM_KEY_FILE);
-    int status = system(command);
-    if (status != 0) {
-        fprintf(stderr, "Errore durante l'importazione della chiave nel TPM.\n");
-        return 1;
-    }
-    return 0;
-}
-
-int sign_message_with_tpm(ESYS_CONTEXT *ctx, const char *message) {
-    char command[512];
-    snprintf(command, sizeof(command),
-             "echo \"%s\" > message.dat && tpm2_sign -c kyber512_key.pub -g sha256 -m message.dat -f plain -s signature.dat",
-             message);
-    int status = system(command);
-    if (status != 0) {
-        fprintf(stderr, "Errore durante la firma del messaggio con TPM.\n");
-        return 1;
-    }
-    return 0;
-}
-
+// Funzione principale
 int main() {
-    ESYS_CONTEXT *ctx;
-    unsigned char *public_key = NULL, *secret_key = NULL;
-
-    if (initialize_tpm_context(&ctx) != 0){
-        return 1;
+    // Inizializzazione di liboqs
+    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_default);
+    if (kem == NULL) {
+        fprintf(stderr, "Error initializing OQS KEM\n");
+        return EXIT_FAILURE;
     }
 
-    if (generate_pq_key(&public_key, &secret_key) != 0 ){
-        Esys_Finalize(&ctx);
-        return 1;
+    // Generazione di chiavi quantistiche
+    uint8_t *public_key = malloc(kem->length_public_key);
+    uint8_t *secret_key = malloc(kem->length_secret_key);
+    if (OQS_KEM_keypair(kem, public_key, secret_key) != OQS_SUCCESS) {
+        fprintf(stderr, "Error generating key pair\n");
+        return EXIT_FAILURE;
     }
 
-    FILE *key_file = fopen("TPM_KEY_FILE", "wb");
-    if (!key_file){
-        fprintf(stderr, "Errore durante la creazione del file di chiave.\n");
-        free(public_key);
-        free(secret_key);
-        Esys_Finalize(&ctx);
-        return 1;
+    // Sigillare la chiave segreta nel TPM
+    seal_key_in_tpm((const char *)secret_key, "secret.key");
+
+    // Eseguire l'incapsulamento (cifratura)
+    uint8_t *ciphertext = malloc(kem->length_ciphertext);
+    uint8_t *shared_secret = malloc(kem->length_shared_secret);
+    if (OQS_KEM_encaps(kem, ciphertext, shared_secret, public_key) != OQS_SUCCESS) {
+        fprintf(stderr, "Error during encapsulation\n");
+        return EXIT_FAILURE;
     }
 
-    const char *message = "Messaggio di test per firma TPM";
-    if(sign_message_with_tpm(ctx, message) != 0){
-        free(public_key);
-        free(secret_key);
-        Esys_Finalize(&ctx);
-        return 1;
+    // Verifica la crittografia
+    printf("Encrypted data: ");
+    for (size_t i = 0; i < kem->length_ciphertext; i++) {
+        printf("%02x", ciphertext[i]);
+    }
+    printf("\n");
+
+    // Unseal the secret key from the TPM
+    unseal_key_from_tpm("secret.key");
+
+    // Decrypt the shared secret
+    // (Assuming secret_key has been read from unsealed_key)
+    uint8_t *unsealed_secret_key = malloc(kem->length_secret_key);
+    FILE *key_fp = fopen("unsealed_key", "r");
+    fread(unsealed_secret_key, sizeof(uint8_t), kem->length_secret_key, key_fp);
+    fclose(key_fp);
+
+    if (OQS_KEM_decaps(kem, shared_secret, ciphertext, unsealed_secret_key) != OQS_SUCCESS) {
+        fprintf(stderr, "Error during decapsulation\n");
+        return EXIT_FAILURE;
     }
 
-    printf("Firma completata. Controlla 'signature.dat' per la firma generata.\n");
+    // Verifica la decapsulazione
+    printf("Shared secret: ");
+    for (size_t i = 0; i < kem->length_shared_secret; i++) {
+        printf("%02x", shared_secret[i]);
+    }
+    printf("\n");
+
+    // Pulizia
+    OQS_KEM_free(kem);
     free(public_key);
     free(secret_key);
-    Esys_Finalize(&ctx);
+    free(ciphertext);
+    free(shared_secret);
+    free(unsealed_secret_key);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
