@@ -57,7 +57,7 @@ struct tpm_createprimary_ctx {
     TPMI_ALG_HASH parameter_hash_algorithm;
 };
 
-#define DEFAULT_PRIMARY_KEY_ALG "rsa2048:null:aes128cfb"
+#define DEFAULT_PRIMARY_KEY_ALG "kyber768:null:aes128cfb"
 static tpm_createprimary_ctx ctx = {
     .alg = DEFAULT_PRIMARY_KEY_ALG,
     .objdata = {
