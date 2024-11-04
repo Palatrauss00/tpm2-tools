@@ -31,7 +31,7 @@ void unseal_key_from_tpm() {
 // Funzione principale
 int main() {
     // Inizializzazione di liboqs
-    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_kem_kyber_90s); // Usa l'algoritmo Kyber 90s
+    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_kyber_768);
     if (kem == NULL) {
         fprintf(stderr, "Error initializing OQS KEM\n");
         return EXIT_FAILURE;
