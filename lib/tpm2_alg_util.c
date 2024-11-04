@@ -571,7 +571,6 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
             goto error;
         }
         i++;
-        printf("%d", i);
     }
 
     if (i == 0) {
@@ -1056,6 +1055,7 @@ tool_rc tpm2_alg_util_public_init(const char *alg_details, const char *name_halg
     TPM2B_PUBLIC tmp = *public;
     bool res = tpm2_alg_util_handle_ext_alg(alg_details, &tmp);
     if (!res) {
+        printf("SONO ENTRATO QUI");
         LOG_ERR("Could not handle algorithm: \"%s\"", alg_details);
         return tool_rc_unsupported;
     }
