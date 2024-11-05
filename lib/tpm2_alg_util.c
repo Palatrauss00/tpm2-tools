@@ -594,6 +594,7 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
     for (i = 0; i < 2; i++) {
         prc = handle_scheme(scheme, public);
         if (prc == alg_parser_rc_done) {
+            printf("ECCO QUI L'ERRORE");
             /* we must have exhausted all the entries or it's an error */
             return symdetail ? false : true;
         }
@@ -626,7 +627,6 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
     return true;
 
     error:
-    printf("SONO ENTRATO QUI\n");
     LOG_ERR("Could not handle algorithm spec: \"%s\"", alg_spec);
     return false;
 }
