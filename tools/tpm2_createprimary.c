@@ -216,6 +216,7 @@ static tool_rc process_inputs(ESYS_CONTEXT *ectx) {
     /*
      * Initialize the public properties of the key
      */
+    printf("%s %s", ctx.halg, ctx.attrs);
     rc = tpm2_alg_util_public_init(ctx.alg, ctx.halg, ctx.attrs,
             ctx.policy, DEFAULT_ATTRS, &ctx.objdata.in.public);
     if (rc != tool_rc_success) {
@@ -408,6 +409,7 @@ static tool_rc tpm2_tool_onrun(ESYS_CONTEXT *ectx, tpm2_option_flags flags) {
     /*
      * 2. Process inputs
      */
+    printf(ctx.halg);
     rc = process_inputs(ectx);
     if (rc != tool_rc_success) {
         return rc;
