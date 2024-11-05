@@ -423,7 +423,7 @@ static alg_parser_rc handle_keyedhash(TPM2B_PUBLIC *public) {
 }
 
 static alg_parser_rc handle_object(const char *object, TPM2B_PUBLIC *public) {
-
+    printf("%s", object);
     if (!strncmp(object, "rsa", 3)) {
         object += 3;
         return handle_rsa(object, public);
