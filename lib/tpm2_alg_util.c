@@ -579,12 +579,12 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
 
     alg_parser_rc prc = handle_object(object, public);
     if (prc == alg_parser_rc_done) {
-        printf("TROVATO\n");
         /* we must have exhausted all the entries or it's an error */
         return scheme || symdetail ? false : true;
     }
 
     if (prc == alg_parser_rc_error) {
+        printf("TROVATO\n");
         return false;
     }
 
